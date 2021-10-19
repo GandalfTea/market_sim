@@ -29,10 +29,10 @@ OPTIONS = False
 
 
 # Securities
-@dataclass
-class _sentry(price, volume):   # History entry for security
-    price : float = price
-    volume : int = volume
+#@dataclass
+#class _sentry(price, volume):   # History entry for security
+#    price : float = price
+#    volume : int = volume
 
 @dataclass
 class security:
@@ -60,13 +60,13 @@ class prt:
         self.tolerance = random.random()
         self.liquidity : int = 0 
         self.assets = np.zeros(NUM_OF_SECURITIES) 
-        self.prob = uprob() 
+        #self.prob = uprob() 
 
     def __repr__(self):
         space = (20 - len(str(self.liquidity))) * " "   # nice console formatting
         return str(self.liquidity) + space + str(self.tolerance) + " "
 
-    def uprob(prices):
+    def uprob():
         a = 1
         
         # to take into account:
