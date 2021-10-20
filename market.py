@@ -55,10 +55,11 @@ class state:
           "GAY"  : security("GAY",  21.34,   8500000),
           "RPG"  : security("RPG",  1.35,    800000),
           "LOL"  : security("LOL",  0.5,     120000000),
-          "METH" : security("METH", 420.69,  3000000)]
+          "METH" : security("METH", 420.69,  3000000)}
 
     v100, p100 = {}
-    total_v : int, total_p : int = 0
+    total_v : int = 0
+    total_p : int = 0
 
     def update(self):
         v100.clear()
@@ -108,22 +109,37 @@ class prt:
                 vol_avg += frame.volume
             price_avg /= sec.history.length
             vol_avg /= sec.history.length 
-        
+
+        # calculate unbiased stock probability based on old data and then add personal bias
+
+        # Calculate total volume of market over all of history
+        # Calculate total volume of stock over all history
+        # Calculate the influance of stock volume over total market -> piece of 1.0
+        # Unbias this by doing the same thing with price and averageing the probability
+
+        # Price danger variable:
+        # Inverse exponential danger toward higher values
+        # Linear regretion for price over time
+        # Corelate with inverse exponential stored in cache (runs once per cycle)
+        # 2 volatility variables, one 100 days, one last day
+        # Calculate probabilitye from all 3 variables and store into memory for the cycle
+        # Only run nonce variation for each participant
+
+        # Linear regretion for average price change.
+        # Calculate R value 
+
+        # At the end, you have 4 variables:
+        #   * % change in market
+        #   * % change in Price / Danger potential with linear regretion
+        #   * Total Influence
+        #   * Nonce
+
         # * calculate influence of price and volume from total of 100 cycles
         # * total volume = 1 . Persantage of each stock is redacted from this 1
         # * This biases both sides because high price will have way more influence on price average and cheap
         # stocks will have way more influence in volume average.
         #  * This can be canceled out by averaging the two probabilities at the end.
 
-
-
-        # to take into account:
-        #   * price 
-        #   * volume
-        #   * risk tolerance
-        #   * nonce
-
-        # calculate unbiased stock probability based on old data and then add personal bias
         
     def cycle():
         die()
