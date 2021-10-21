@@ -1,4 +1,4 @@
-
+import sys
 import random
 import math
 import numpy as np
@@ -30,19 +30,20 @@ OPTIONS = False
 
 # Securities
 @dataclass
-class _sentry(price, volume):   # History entry for security
-    price : float = price
-    volume : int = volume
+class _sentry():   # History entry for security
+    price : float = 0. 
+    volume : int = 0
 
 @dataclass
 class security:
     name : str = ""
-    price : float = 0
+    price : float = 0.
     volume : int = 0 
+    full_volume : int = 0
     history = []        # collection of past 100 cycles of volume and price
 
     def __repr__(self) -> str:
-        return self.name + " : " + self.price + " : " + self.volume
+        return self.name + " : " + str(self.price) + " : " + str(self.volume)
 
     def record(self, o_price : float, o_volume : int):
         history.append(_sentry(o_price, o_volume))
@@ -57,9 +58,14 @@ class state:
           "LOL"  : security("LOL",  0.5,     120000000),
           "METH" : security("METH", 420.69,  3000000)}
 
-    v100, p100 = {}
+    v100, p100 = {}, {}
     total_v : int = 0
     total_p : int = 0
+    
+    # called every cycle
+    def init(self):
+        self.update()
+        self._probs()
 
     def update(self):
         v100.clear()
@@ -74,63 +80,57 @@ class state:
             total_v += v
             total_p += p
 
+    #dump state
+    def __repr__(self):
+        for sec in s:
+            print(sec.name + "\n" + "Price : " + str(sec.price) + "\n" + "Current Volume : " + str(sec.volume))
+
+
     def record(self):
         for sec in s:
             sec.record(sec.price, sec.volume)
             sec.volume = 0
 
-    #dump state
-    def __repr__(self):
-        for sec in s:
-            print(sec.name + "\n" + "Price : " + sec.price + "\n" + "Current Volume : " + sec.volume)
 
+    # calculate unbiased stock probability 
+    # RUNS ONCE PER CYCLE
+    def _probs(self):
 
-# Participants
-class prt:
-    def __init__(self):
-        self.nonce = random.randrange(1, 1000)  # measure of personal bias and irrationality
-        self.tolerance = random.random()
-        self.liquidity : int = 0 
-        self.assets = np.zeros(NUM_OF_SECURITIES) 
-        self.prob = uprob() 
-
-    def __repr__(self):
-        space = (20 - len(str(self.liquidity))) * " "   # nice console formatting
-        return str(self.liquidity) + space + str(self.tolerance) + " "
-
-    def uprob():
-        a = 1
-
-        for sec in s:
-            price_avg = 0
-            vol_avg = 0
-            for frame in sec.history:
-                price_avg += frame.price
+        # Calculate average price and volume over last 100 cycles per stock
+        prc_avg = 0
+        vol_avg = 0
+        for key, sec in enumerate(self.s):
+            for frame in self.s[sec].history:
+                prc_avg += frame.price
                 vol_avg += frame.volume
-            price_avg /= sec.history.length
-            vol_avg /= sec.history.length 
+            try:
+                prc_avg /= len(self.s[sec].history)
+                vol_avg /= len(self.s[sec].history)
+            except ZeroDivisionError:
+                sys.exit("\033[91m FATAL ERROR: Division by zero in uprob(). No items found in history stack.\n")
+            except:
+                sys.exit("FATAL ERROR: Fatal error in uprob().")
+         
+        #    Stock Influence Variable
+        # the influence of volume is heavily biased towards the lower priced stocks
+        # we debias this by calculating the influence of mean price over mean total of all prices
+        vol_inf =  1 - ((total_v - vol_avg) / total_v)
+        prc_inf =  1 - ((total_p - prc_avg) / total_p)
+        influence = (vol_inf + prc_inf) / 2
 
-        # calculate unbiased stock probability based on old data and then add personal bias
 
-        # Calculate total volume of market over all of history
-        # Calculate total volume of stock over all history
-        # Calculate the influance of stock volume over total market -> piece of 1.0
-        # Unbias this by doing the same thing with price and averageing the probability
-
-        # Price danger variable:
+        #   Volidity Variable
+        # Change in price : Linear regretion average for price over last 100 cycles
         # Inverse exponential danger toward higher values
-        # Linear regretion for price over time
-        # Corelate with inverse exponential stored in cache (runs once per cycle)
+        # Corelate with inverse exponential stored in cache 
         # 2 volatility variables, one 100 days, one last day
         # Calculate probabilitye from all 3 variables and store into memory for the cycle
-        # Only run nonce variation for each participant
 
-        # Linear regretion for average price change.
         # Calculate R value 
 
         # At the end, you have 4 variables:
         #   * % change in market
-        #   * % change in Price / Danger potential with linear regretion
+        #   * Danger potential
         #   * Total Influence
         #   * Nonce
 
@@ -139,6 +139,28 @@ class prt:
         # * This biases both sides because high price will have way more influence on price average and cheap
         # stocks will have way more influence in volume average.
         #  * This can be canceled out by averaging the two probabilities at the end.
+        
+
+
+state = state()
+
+
+# Participants
+class prt:
+    def __init__(self):
+        self.nonce = random.randrange(1, 1000)  # measure of personal bias and irrationality
+        self.tolerance = random.random()        # will be updated after every 10 cycles depending on trading results
+        self.liquidity : int = 0                # init in __bias_liq() 
+        self.assets = np.zeros(NUM_OF_SECURITIES) 
+        #self.prob = self.pprob() 
+
+    def __repr__(self):
+        space = (20 - len(str(self.liquidity))) * " "   # nice console formatting
+        return str(self.liquidity) + space + str(self.tolerance) + " "
+
+    # personal probability. Adds bias and tolerance
+    def pprob():
+        die()
 
         
     def cycle():
@@ -152,14 +174,7 @@ def __bias_liq(num):
         if g[i] < 10.:
             g[i] = None 
     g = g[np.logical_not(np.isnan(g))]        
-
-    #plt.plot(g)
-    #plt.show()
-    #np.set_printoptions(suppress=True)
-    #print(g)
-
     return g
-
 
 
 class market_maker:
@@ -181,7 +196,14 @@ for i in range(1000):
     print(obj)
     
 vals = np.array(vals_liquidity)
-plt.plot(vals)
+vals = np.sort(vals)
+t_vals = np.sort(np.array(vals_tolerance))
+
+figure, axis = plt.subplots(2, 2)
+axis[0,0].plot(vals, linewidth=0.6)
+axis[0,0].set_title("Liquidity dist")
+axis[0,1].plot(t_vals ,linewidth=0.6)
+axis[0,1].set_title("Tolerance dist")
 plt.show()
 
 
