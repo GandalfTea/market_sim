@@ -26,8 +26,6 @@ IRRATIONALITY = 0.5       # % of people behaving irrationally
 OPTIONS = False
 
 
-figure, axis = plt.subplots(2, 2)
-
 
 # Securities
 @dataclass
@@ -180,7 +178,7 @@ class prt:
         self.tolerance = random.random()                # TODO:  updated after every 10 cycles depending on trading results
         self.liquidity : int = 0                        # init in __bias_liq() 
         self.assets = np.zeros(NUM_OF_SECURITIES) 
-        self.probs = self.pprob()
+        self.probs = {} 
 
     def __repr__(self):
         space = (20 - len(str(self.liquidity))) * " "   # nice console formatting
@@ -192,12 +190,19 @@ class prt:
         # filter all sec by risk level and remove all that are over the indiviaual's risk tolerance
         # add nonce
 
-        can_buy = []
+        can_buy = {} 
         for i in state.probs:
-            if(self.tolerance >= state.probs[i][1]):
-                can_buy.append(state.probs[i])
+            # no partial stock buys for now
+            if(self.liquidity >= state.s[i].price):
+                if(self.tolerance >= state.probs[i][1]):
+                    can_buy[i] = [i, state.probs[i]]
         for i in can_buy:
-            i[0] = (i[0] + random.uniform(0, self.nonce)) / 2
+            #if(can_buy[i][0] == "GAY"):
+                #print(can_buy[i])
+            print(str(can_buy[i][0]) + " " + str(can_buy[i][1][0]))
+            can_buy[i][1][0] = (can_buy[i][1][0] + random.uniform(0, self.nonce)) / 2
+            print(str(can_buy[i][0]) + " " + str(can_buy[i][1][0]))
+            
         return can_buy
         
     def cycle():
@@ -223,25 +228,37 @@ class market_maker:
 
 vals_tolerance = [] 
 vals_liquidity = []
+probs = {} 
+
+figure, axis = plt.subplots(2, 2)
+
 
 g = __bias_liq(1000)
 for i in range(1000):
+    #print("\n")
     obj = prt()
     obj.liquidity = g[i]
+    obj.probs = obj.pprob()
     vals_tolerance.append(obj.tolerance)
     vals_liquidity.append(obj.liquidity)
-    print("\n")
-    print(str(obj.liquidity) + " \ntolerance :  " + str(obj.tolerance) + " \nnonce : " + str(obj.nonce) + " \nprobs : " + str(obj.probs))
-    #print(obj)
+    #print(str(obj.liquidity) + " \ntolerance :  " + str(obj.tolerance) + " \nnonce : " + str(obj.nonce) + " \nprobs : " + str(obj.probs))
+    if(len(obj.probs) != 0):
+        for i in obj.probs:
+            #print(str(obj.probs[i][1][0]) + " " + str(state.probs[i][0]))
+            probs[i] = [obj.probs[i][1][0], state.probs[i][0]]
+            axis[1,0].plot(probs[i], linewidth=0.3)
+
     
 vals = np.array(vals_liquidity)
 vals = np.sort(vals)
 t_vals = np.sort(np.array(vals_tolerance))
 
+axis[1,0].set(ylim=(-1,1))
+
 axis[0,0].plot(vals, linewidth=0.6)
 axis[0,0].set_title("Liquidity dist")
 axis[0,1].plot(t_vals ,linewidth=0.6)
 axis[0,1].set_title("Tolerance dist")
-#plt.show()
+plt.show()
 
 
