@@ -17,8 +17,6 @@ from functools import reduce
 # Trust point system
 
 
-
-
 NUM_OF_PARTICIPANTS = 10000
 CYCLES_PER_MINUTE = 100
 NUM_OF_SECURITIES = 10
@@ -107,7 +105,7 @@ class state:
         self.update()
 
         #   Market Volidity Variable
-        #market_volidity = abs((self.history[-1].price - self.history[0].price) / self.history[-1].price)
+        #market_volatility = abs((self.history[-1].price - self.history[0].price) / self.history[-1].price)
 
         print( "\nTotal Volume : " + str(self.total_v) + "\nTotal Price : " + str(self.total_p))
 
@@ -154,7 +152,7 @@ class state:
 
 
             #   Risk Variable
-            # Sigmoid function to corelate
+            # Sigmoid function to corelate volatility
             risk = (2/(1+math.e**(-volatility / 0.01555)))-1
             print("\t risk  : " +  str(risk)) 
 
