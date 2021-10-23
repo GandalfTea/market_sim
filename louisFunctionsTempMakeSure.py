@@ -1,142 +1,53 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Oct 23 11:15:12 2021
+Created on Sat Oct 23 15:08:53 2021
 
 @author: Louis
 """
-import math
+#e**(mt+c)
+#t was count 
+import timeit
 
-def encondePassword(password):
-    encript=[]
-    for n in range(20):
-        x=ord(password[n])
-        encriptPeriod=1.4*math.cos(2.1*x+3)+math.cos(4.3*x+2)+0.2*math.cos(12*x+5)
-        if n != 0:
-            encript.append(encriptPeriod+encript[n-1])
-        else:
-            encript.append(encriptPeriod)
-    return encript
+from tempPricesArray import data as prices
 
 
-userDictionary={}
+start=timeit.default_timer()
+
+def expoRegression(p):
+    import math
+    t=[]
+    tcount=0
+    for n in range(len(p)):
+        t.append(tcount)
+        tcount+=1
+    pLin=[]
+    for n in range(len(p)):
+        pLin.append(math.log(p[n]))
+    pLinMean=sum(pLin)/len(pLin)
+    tMean=t[len(t)-1]/2
+    gradients=[]
+    for n in range(len(pLin)-1):
+        gradients.append((pLin[n+1]-pLin[n]))
+    m=sum(gradients)/len(gradients)
+    c=pLinMean-m*tMean
+    return([m,c])
 
 
-cheese=True
-while cheese == True:
-    option=input("Login or signup? (l/s)\n")
-    if option=="l":
-        cheese2=True
-        while cheese2==True:
-            username : str =input("username:\n")
-            password : str =input("password:\n")
-            try:
-                if encondePassword(password) == userDictionary[username]:
-                    cheese=False
-                    cheese2=False
-                    print("Access Granted")
-                    del password
-                else:
-                    exitt=input("Incorrect username or password. (e to exit)\t")
-                    if exitt=="e":
-                        cheese2=False
-            except KeyError:
-                exitt=input("Incorrect username or password. (e to exit)\t")
-                if exitt=="e":
-                    cheese2=False
-    
-    elif option=="s":
-        username : str =input("username:\n")
-        password : str =input("password:\n")
-        userDictionary.update({username : encondePassword(password)})
-        
+#add t and change p2 afterwards
+#using octavian's
+def volitility(m,c,p):
+    import math
+    #p2=p[-t:]
+    total=[]
+    for n in range(len(p)):
+        total.append(abs(p[n]-(math.e)**(m*n+c))/((math.e)**(m*n+c)))
+    return sum(total)/len(total)
 
 
-#%%
+expo=expoRegression(prices)
+cheese = volitility(expo[0],expo[1],prices)
 
-
-
-import PySimpleGUI as sg
-
-sg.Window(title="Louis' App", layout=[[]], margins=(100, 50)).read()
-
-#%%
-
-
-import PySimpleGUI as sg
-
-layout = [[sg.Text("Hello from PySimpleGUI")], [sg.Button("OK"), sg.Button('Close Window')], [sg.InputText('', size=(10,1), key='cheese')]]
-
-# Create the window
-window = sg.Window("Demo", layout)
-event, values = window.Read()
-
-# Create an event loop
-while True:
-    event, values = window.read()
-    # End program if user closes window or
-    # presses the OK button
-    if event == 'OK':
-        cheese2 = int(values['cheese'])
-    if event == "Close Window" or event == sg.WIN_CLOSED:
-        break
-
-window.close()
-
-
-#%%
-
-
-
-import PySimpleGUI as sg
-
-sg.theme('DarkAmber')   # Add a touch of color
-# All the stuff inside your window.
-cheeseeee="Input Text to display"
-layout = [  [sg.Text('Some text on Row 1')],
-            [sg.Text('Enter something on Row 2'), sg.InputText()],
-            [sg.Button('Ok'), sg.Button('Cancel')],
-            [sg.Text(cheeseeee)]]
-
-# Create the Window
-window = sg.Window('Window Title', layout)
-# Event Loop to process "events" and get the "values" of the inputs
-while True:
-    event, values = window.read()
-    if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
-        break
-    print('You entered ', values[0])
-    cheeseeee=values[0]
-
-window.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+stop = timeit.default_timer()
+print(cheese)
+totalTime= stop - start
+print("Time:", f'{totalTime:.20f}')
