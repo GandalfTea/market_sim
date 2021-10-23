@@ -143,17 +143,17 @@ class state:
             for i in range(len(prices)-1):
                 v = abs((prices[i+1] - prices[i]) / prices[i+1])
                 diff.append(v)
+
             volatility = reduce(lambda a,b: a+b, diff) / len(diff)
 
             print("\t volatility  : " +  str(volatility) + " : " + str(self.s[sec].history[0].price) + " to " + str(self.s[sec].history[-1].price))
 
 
-            #   TODO: Price Prediction
+            #   maybe  TODO: Price Prediction
             # Linear regretion prediction from price over last 100 cycles
-            # Used to calculate the risk variable
 
 
-            #   TODO: Risk Variable
+            #   Risk Variable
             # Sigmoid function to corelate
             risk = (2/(1+math.e**(-volatility / 0.01555)))-1
             print("\t risk  : " +  str(risk)) 
@@ -161,7 +161,6 @@ class state:
 
 
             # At the end, you have 5 variables:
-            #   * Linear regression price prediction
             #   * Market Volidity 
             #   * Danger potential
             #   * Total Influence over market
