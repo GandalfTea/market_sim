@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from typing import NewType
+from functools import reduce
 
 # Initialize a number of participants who have:
 #   * Rand sum of money
@@ -133,10 +134,18 @@ class state:
                 sys.exit("\033[91m FATAL ERROR: Dision by 0 in  _probs")
 
 
-            #   Volidity Variable
+            #   Volatility Variable
             # Used to calculate the risk variable
-            per_change = (self.s[sec].history[-1].price - self.s[sec].history[0].price) / self.s[sec].history[-1].price
-            print("\t volidity  : " +  str(per_change) + " : " + str(self.s[sec].history[0].price) + " to " + str(self.s[sec].history[-1].price))
+            prices = []
+            for i in self.s[sec].history:
+                prices.append(i.price)
+            diff = []
+            for i in range(len(prices)-1):
+                v = abs((prices[i+1] - prices[i]) / prices[i+1])
+                diff.append(v)
+            volatility = reduce(lambda a,b: a+b, diff) / len(diff)
+
+            print("\t volatility  : " +  str(volatility) + " : " + str(self.s[sec].history[0].price) + " to " + str(self.s[sec].history[-1].price))
 
 
             #   TODO: Price Prediction
@@ -145,11 +154,9 @@ class state:
 
 
             #   TODO: Risk Variable
-            # Inverse exponential danger distribution stored in cache -- does not modify over cycles
-            # Corelate volidity with inverse exponential 
-            # 2 volatility variables, one 100 days, one last day
-            # Calculate probabilities from all 3 variables and store into memory for the cycle
-            risk = random.random() # for now
+            # Sigmoid function to corelate
+            risk = (2/(1+math.e**(-volatility / 0.01555)))-1
+            print("\t risk  : " +  str(risk)) 
 
 
 
@@ -160,7 +167,7 @@ class state:
             #   * Total Influence over market
             #   * Nonce -- in specific participant pprob()
 
-            win_prob = (per_change + influence) / 2
+            win_prob = (volatility + influence) / 2
             self.probs[sec] = [win_prob, risk]
             print("\t win?      : " + str(win_prob))
 
@@ -199,9 +206,9 @@ class prt:
         for i in can_buy:
             #if(can_buy[i][0] == "GAY"):
                 #print(can_buy[i])
-            print(str(can_buy[i][0]) + " " + str(can_buy[i][1][0]))
+            #print(str(can_buy[i][0]) + " " + str(can_buy[i][1][0]))
             can_buy[i][1][0] = (can_buy[i][1][0] + random.uniform(0, self.nonce)) / 2
-            print(str(can_buy[i][0]) + " " + str(can_buy[i][1][0]))
+            #print(str(can_buy[i][0]) + " " + str(can_buy[i][1][0]))
             
         return can_buy
         
