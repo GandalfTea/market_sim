@@ -3,11 +3,24 @@ Stock market simulator made in python.
 
 
 ### To Use
-```
+```bash
 git clone https://github.com/gandalftea/market_sim.git
 cd market_sim
 python market.py
 ```
+   
+   
+Commands:
+```bash
+-p [int]            Init number of participants
+-s [int]            Init number of securities
+-v, -verbose        Verbose print all
+-vs                 Verbose print securities details
+-vp                 Verbose print participant information
+-vm                 Verbose print market transaction details
+--h, --help         Help
+```
+
 
 ### How it works:
 
