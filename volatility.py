@@ -33,5 +33,5 @@ print(risk(volatility_100))
 print("6000 : ",volatility_1000)
 print(risk(volatility_1000))
 
-print('Time: ' + f'{stop-start:.20f}')  
+print('\033[92mTime: ' + f'{stop-start:.20f}')  
 

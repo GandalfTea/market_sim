@@ -4,8 +4,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
-from typing import NewType
 from functools import reduce
+import timeit
 
 # Initialize a number of participants who have:
 #   * Rand sum of money
@@ -18,15 +18,15 @@ from functools import reduce
 
 
 NUM_OF_PARTICIPANTS = 10000
-CYCLES_PER_MINUTE = 100
+#CYCLES_PER_MINUTE = 100
 NUM_OF_SECURITIES = 10
-LONG = 20                 # % of people who hold long
-IRRATIONALITY = 0.5       # % of people behaving irrationally
-OPTIONS = False
+IRRATIONALITY = 0.5     # no clue how to use this yet 
 VERBOSE = False
 VERBOSE_PARTICIPANTS = False 
 VERBOSE_SECURITIES = False 
 VERBOSE_MARKET = False 
+TIME_ELAPSED = False
+
 
 if len(sys.argv) >= 2:
     argv = sys.argv[1:]
@@ -39,6 +39,8 @@ if len(sys.argv) >= 2:
             VERBOSE_SECURITIES = True 
         elif i == "-vm":
             VERBOSE_MARKET = True 
+        elif i == "-t":
+            TIME_ELAPSED = True
         elif i in ("-p", "-participants"):
             try:
                 NUM_OF_PARTICIPANTS = int(argv[argv.index(i) + 1])
@@ -54,9 +56,11 @@ if len(sys.argv) >= 2:
             except IndexError:
                 sys.exit("Error: no input detected")
         elif i in ("--h", "--help"):
-            print("\nPossible Commands : " \
+            print("\nCommands : " \
                 "\n\t-p [int] : number of participants" \
+                "\n\t-s [int] : number of securities" \
                 "\n\t-v, -verbose : verbose" \
+                "\n\t-t  : processing time" \
                 "\n\t-vp : verbose participants" \
                 "\n\t-vs : verbose securities" \
                 "\n\t-vm : verbose market")
@@ -65,6 +69,17 @@ if len(sys.argv) >= 2:
             sys.exit("Command not recognized. Type --h or --help for help")
 
 
+# For formatting console output color
+class bcolors:
+    HEADER    = '\033[95m'
+    OKBLUE    = '\033[94m'
+    OKCYAN    = '\033[96m'
+    OKGREEN   = '\033[92m'
+    WARNING   = '\033[93m'
+    FAIL      = '\033[91m'
+    ENDC      = '\033[0m'
+    BOLD      = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
 # Securities
@@ -95,7 +110,7 @@ class state:
           "GAY"  : security("GAY",  21.34,   8500000),
           "RPG"  : security("RPG",  1.35,    800000),
           "LOL"  : security("LOL",  0.5,     120000000),
-          #"METH" : security("METH", 420.69,  3000000)
+          "METH" : security("METH", 420.69,  3000000)
     }
 
     s["ASS"].record(218.54, 966)
@@ -110,6 +125,9 @@ class state:
     s["RPG"].record(1.24, 5674)
     s["RPG"].record(1.11, 3689)
     s["RPG"].record(0.96, 431)
+    s["METH"].record(420.56, 5682)
+    s["METH"].record(420.34, 9673)
+    s["METH"].record(420.46, 8165)
 
     history = []
     total_v : int = 0
@@ -143,11 +161,18 @@ class state:
     # calculate unbiased stock probability 
     # RUNS ONCE PER CYCLE
     def _probs(self):
+
+        # At the end, you have 5 variables:
+        #   * Market Volidity 
+        #   * Danger potential
+        #   * Total Influence over market
+        #   * Nonce -- in specific participant pprob()
+
         self.update()
 
         #   Market Volidity Variable
         #market_volatility = abs((self.history[-1].price - self.history[0].price) / self.history[-1].price)
-        if(VERBOSE_MARKET): print( "\nTotal Volume : " + str(self.total_v) + "\nTotal Price : " + str(self.total_p))
+        if(VERBOSE_MARKET or VERBOSE): print( "\nTotal Volume : " + str(self.total_v) + "\nTotal Price : " + str(self.total_p))
 
         for key, sec in enumerate(self.s):
 
@@ -167,7 +192,7 @@ class state:
                 vol_inf =  1 - ((self.total_v - vol) / self.total_v)
                 prc_inf =  1 - ((self.total_p - prc) / self.total_p)
                 influence = (vol_inf + prc_inf) / 2
-                if(VERBOSE_SECURITIES): print("\n" + sec + "      influence : " + str(influence)) 
+                if(VERBOSE_SECURITIES or VERBOSE): print("\n" + sec + "      influence : " + str(influence)) 
             except ZeroDivisionError:
                 sys.exit("\033[91m FATAL ERROR: Dision by 0 in  _probs")
 
@@ -180,39 +205,34 @@ class state:
             for i in range(len(prices)-1):
                 v = abs((prices[i+1] - prices[i]) / prices[i+1])
                 diff.append(v)
-
             volatility = reduce(lambda a,b: a+b, diff) / len(diff)
-            if(VERBOSE_SECURITIES): print("\t volatility  : " +  str(volatility) + " : " + str(self.s[sec].history[0].price) + " to " + str(self.s[sec].history[-1].price))
-
-            #   maybe  TODO: Price Prediction
-            # Linear regretion prediction from price over last 100 cycles
+            if(VERBOSE_SECURITIES or VERBOSE): print("\t volatility  : " +  str(volatility) + " : " + str(self.s[sec].history[0].price) + " to " + str(self.s[sec].history[-1].price))
 
             #   Risk Variable
             # Sigmoid function to corelate volatility
             risk = (2/(1+math.e**(-volatility / 0.01555)))-1
-            if(VERBOSE_SECURITIES): print("\t risk  : " +  str(risk)) 
-
-            # At the end, you have 5 variables:
-            #   * Market Volidity 
-            #   * Danger potential
-            #   * Total Influence over market
-            #   * Nonce -- in specific participant pprob()
+            if(VERBOSE_SECURITIES or VERBOSE): print("\t risk  : " +  str(risk)) 
 
             win_prob = (volatility + influence) / 2
             self.probs[sec] = [win_prob, risk]
-            if(VERBOSE_SECURITIES): print("\t win?      : " + str(win_prob))
+            if(VERBOSE_SECURITIES or VERBOSE): print("\t win?      : " + str(win_prob))
 
 
+start = timeit.default_timer()
 state = state()
 state._probs()
+stop = timeit.default_timer()
 print("\n\n")
-for i in state.probs:
-    print(state.probs[i])
+if TIME_ELAPSED or VERBOSE: print(f'{bcolors.OKGREEN}State cycle start time: ' + f'{stop-start:.20f}{bcolors.ENDC}')  
+#for i in state.probs:
+#    print(state.probs[i])
+
+
 
 # Participants
 class prt:
     def __init__(self):
-        self.nonce = random.uniform(-1, 1)            # measure of personal bias and irrationality
+        self.nonce = random.uniform(-1, 1)              # measure of personal bias and irrationality
         self.tolerance = random.random()                # TODO:  updated after every 10 cycles depending on trading results
         self.liquidity : int = 0                        # init in __bias_liq() 
         self.assets = np.zeros(NUM_OF_SECURITIES) 
@@ -271,6 +291,7 @@ probs = {}
 figure, axis = plt.subplots(2, 2)
 
 
+start = timeit.default_timer()
 g = __bias_liq(1000)
 for i in range(1000):
     #print("\n")
@@ -279,13 +300,15 @@ for i in range(1000):
     obj.probs = obj.pprob()
     vals_tolerance.append(obj.tolerance)
     vals_liquidity.append(obj.liquidity)
-    #print(str(obj.liquidity) + " \ntolerance :  " + str(obj.tolerance) + " \nnonce : " + str(obj.nonce) + " \nprobs : " + str(obj.probs))
+    if(VERBOSE_PARTICIPANTS): print("\nLiquidity :" + str(obj.liquidity) + " \nTolerance :  " + str(obj.tolerance) + " \nNonce : " + str(obj.nonce) + " \nProbs : " + str(obj.probs))
     if(len(obj.probs) != 0):
         for i in obj.probs:
             #print(str(obj.probs[i][1][0]) + " " + str(state.probs[i][0]))
             probs[i] = [obj.probs[i][1][0], state.probs[i][0]]
             axis[1,0].plot(probs[i], linewidth=0.3)
 
+stop = timeit.default_timer()
+if(TIME_ELAPSED or VERBOSE): print(f'{bcolors.OKGREEN}Participant initialization time: ' + f'{stop-start:.20f}{bcolors.ENDC}')  
     
 vals = np.array(vals_liquidity)
 vals = np.sort(vals)
