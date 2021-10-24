@@ -14,7 +14,7 @@ Commands:
 ```bash
 -p [int]            Init number of participants
 -s [int]            Init number of securities
--t [int]            Time Elapsed 
+-t                  Time Elapsed 
 -v, -verbose        Verbose print all
 -vs                 Verbose print securities details
 -vp                 Verbose print participant information
