@@ -23,6 +23,47 @@ NUM_OF_SECURITIES = 10
 LONG = 20                 # % of people who hold long
 IRRATIONALITY = 0.5       # % of people behaving irrationally
 OPTIONS = False
+VERBOSE = False
+VERBOSE_PARTICIPANTS = False 
+VERBOSE_SECURITIES = False 
+VERBOSE_MARKET = False 
+
+if len(sys.argv) >= 2:
+    argv = sys.argv[1:]
+    for i in argv:
+        if i in ("-v", "-verbose"):
+            VERBOSE = True
+        elif i == ("-vp"):
+            VERBOSE_PARTICIPANTS = True 
+        elif i == "-vs":
+            VERBOSE_SECURITIES = True 
+        elif i == "-vm":
+            VERBOSE_MARKET = True 
+        elif i in ("-p", "-participants"):
+            try:
+                NUM_OF_PARTICIPANTS = int(argv[argv.index(i) + 1])
+            except ValueError:
+                sys.exit("Error: input is not int.")
+            except IndexError:
+                sys.exit("Error: no input detected")
+        elif i in ("-s", "-securities"):
+            try:
+                NUM_OF_SECURITIES = int(argv[argv.index(i) + 1])
+            except ValueError:
+                sys.exit("Error: input is not int.")
+            except IndexError:
+                sys.exit("Error: no input detected")
+        elif i in ("--h", "--help"):
+            print("\nPossible Commands : " \
+                "\n\t-p [int] : number of participants" \
+                "\n\t-v, -verbose : verbose" \
+                "\n\t-vp : verbose participants" \
+                "\n\t-vs : verbose securities" \
+                "\n\t-vm : verbose market")
+            sys.exit("")
+        else:
+            sys.exit("Command not recognized. Type --h or --help for help")
+
 
 
 
@@ -56,6 +97,7 @@ class state:
           "LOL"  : security("LOL",  0.5,     120000000),
           #"METH" : security("METH", 420.69,  3000000)
     }
+
     s["ASS"].record(218.54, 966)
     s["ASS"].record(234.72, 334)
     s["ASS"].record(256.01, 2345)
@@ -86,7 +128,6 @@ class state:
             for i in self.s[sec].history[:100]: self.total_v += i.volume
             for i in self.s[sec].history[:100]: self.total_p += i.price
 
-    #dump state
     def __repr__(self):
         for sec in s:
             print(sec.name + "\n" + "Price : " + str(sec.price) + "\n" + "Current Volume : " + str(sec.volume))
@@ -106,8 +147,7 @@ class state:
 
         #   Market Volidity Variable
         #market_volatility = abs((self.history[-1].price - self.history[0].price) / self.history[-1].price)
-
-        print( "\nTotal Volume : " + str(self.total_v) + "\nTotal Price : " + str(self.total_p))
+        if(VERBOSE_MARKET): print( "\nTotal Volume : " + str(self.total_v) + "\nTotal Price : " + str(self.total_p))
 
         for key, sec in enumerate(self.s):
 
@@ -127,10 +167,9 @@ class state:
                 vol_inf =  1 - ((self.total_v - vol) / self.total_v)
                 prc_inf =  1 - ((self.total_p - prc) / self.total_p)
                 influence = (vol_inf + prc_inf) / 2
-                print("\n" + sec + "      influence : " + str(influence)) 
+                if(VERBOSE_SECURITIES): print("\n" + sec + "      influence : " + str(influence)) 
             except ZeroDivisionError:
                 sys.exit("\033[91m FATAL ERROR: Dision by 0 in  _probs")
-
 
             #   Volatility Variable
             # Used to calculate the risk variable
@@ -143,20 +182,15 @@ class state:
                 diff.append(v)
 
             volatility = reduce(lambda a,b: a+b, diff) / len(diff)
-
-            print("\t volatility  : " +  str(volatility) + " : " + str(self.s[sec].history[0].price) + " to " + str(self.s[sec].history[-1].price))
-
+            if(VERBOSE_SECURITIES): print("\t volatility  : " +  str(volatility) + " : " + str(self.s[sec].history[0].price) + " to " + str(self.s[sec].history[-1].price))
 
             #   maybe  TODO: Price Prediction
             # Linear regretion prediction from price over last 100 cycles
 
-
             #   Risk Variable
             # Sigmoid function to corelate volatility
             risk = (2/(1+math.e**(-volatility / 0.01555)))-1
-            print("\t risk  : " +  str(risk)) 
-
-
+            if(VERBOSE_SECURITIES): print("\t risk  : " +  str(risk)) 
 
             # At the end, you have 5 variables:
             #   * Market Volidity 
@@ -166,7 +200,7 @@ class state:
 
             win_prob = (volatility + influence) / 2
             self.probs[sec] = [win_prob, risk]
-            print("\t win?      : " + str(win_prob))
+            if(VERBOSE_SECURITIES): print("\t win?      : " + str(win_prob))
 
 
 state = state()
