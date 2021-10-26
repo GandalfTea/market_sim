@@ -30,14 +30,20 @@ The program runs in cycles. Every cycle participants have a chance to participat
 
 Init:
 
-* Initialize a number of participants who have:
-    * Rand sum of money distributed in an exponential fashion 
-    * Rand pressure tolerance (for now)
+* Initialize a set number of participants who have:
+    * Random sum of money distributed in an exponential fashion 
+    * Rand risk tolerance (for now, will probably calibrate after every trade)
+    * Personal bias variable to introduce irrationality
     * Security choosing algorithm 
-    * Buy / Sell algorithm
+    * Buy / Sell algorithm 
 * Init a number of securities :
-    * Calculate unbiased probability of the stock going up every cycle
-    * Every participant modifies this probability by a vector of personal bias.
+    * Calculate unbiased probability of the stock going up every cycle (from the total influence over market, volatility and general market volatility)
+    * Every participant modifies this probability by a vector of personal bias and decides wheather to buy or sell depending on risk variable and personal risk tolerance. 
 * Market Maker :
-    * Partial execution
-    * No auto pricing (for now)
+    * Automatic price (if participant decides)
+    * Partial execution of orders
+
+TODO:
+* Test market.py with some dummy thick tests.
+* Multiprocessing (sim and market)
+* Polish state dumps
