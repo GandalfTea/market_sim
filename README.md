@@ -7,7 +7,7 @@ Stock market simulator made in python.
 ### To Use
 ```bash
 git clone https://github.com/gandalftea/market_sim.git
-python market.py
+python run.py 
 ```
    
    
