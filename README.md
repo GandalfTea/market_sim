@@ -26,7 +26,7 @@ python run.py
 
 ### How it works:
 
-The program runs in cycles. Every cycle participants have a chance trade.
+The program runs in cycles. Every cycle participants have a chance to trade.
 
 Init:
 
