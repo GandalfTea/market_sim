@@ -1,6 +1,6 @@
 &nbsp;
-
-Stock market simulator made in python.
+### About
+Simulates a simple stock market with a variable number of securities and participants. Made to potentially test an implementation of an information or prediction market by updating a personal trust variable that acts as weight in the final outcome. (China not cool)
 
 &nbsp;
 
@@ -26,15 +26,14 @@ python run.py
 
 ### How it works:
 
-The program runs in cycles. Every cycle participants have a chance to participate in trade.
+The program runs in cycles. Every cycle participants have a chance trade.
 
 Init:
 
 * Initialize a set number of participants who have:
     * Random sum of money distributed in an exponential fashion 
-    * Rand risk tolerance (for now, will probably calibrate after every trade)
+    * Random risk tolerance (for now, will probably calibrate after every trade)
     * Personal bias variable to introduce irrationality
-    * Security choosing algorithm 
     * Buy / Sell algorithm 
 * Init a number of securities :
     * Calculate unbiased probability of the stock going up every cycle (from the total influence over market, volatility and general market volatility)
@@ -42,8 +41,11 @@ Init:
 * Market Maker :
     * Automatic price (if participant decides)
     * Partial execution of orders
+  
+&nbsp;
 
-TODO:
+  
+### TODO:
 * Test market.py with some dummy thick tests.
 * Multiprocessing (sim and market)
 * Polish state dumps
