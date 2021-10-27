@@ -8,7 +8,7 @@ Created on Sat Oct 23 15:08:53 2021
 #t was count 
 import timeit
 
-from tempPricesArray import data as prices
+from datasets/gold import data as prices
 
 
 start=timeit.default_timer()
