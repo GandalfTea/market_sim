@@ -2,18 +2,35 @@
 
 #from market import market
 import sys
+import platform 
+
 
 # ANSI colors 
-class bcolors:
-    HEADER    = '\033[95m'
-    OKBLUE    = '\033[94m'
-    OKCYAN    = '\033[96m'
-    OKGREEN   = '\033[92m'
-    WARNING   = '\033[93m'
-    FAIL      = '\033[91m'
-    ENDC      = '\033[0m'
-    BOLD      = '\033[1m'
-    UNDERLINE = '\033[4m'
+if platform.system() == "Linux":
+    print("\nWorking on Linux")
+    class bcolors:
+        HEADER    = '\033[95m'
+        OKBLUE    = '\033[94m'
+        OKCYAN    = '\033[96m'
+        OKGREEN   = '\033[92m'
+        WARNING   = '\033[93m'
+        FAIL      = '\033[91m'
+        ENDC      = '\033[0m'
+        BOLD      = '\033[1m'
+        UNDERLINE = '\033[4m'
+elif platform.system() == "Windows":
+    print("\nWorking on Windows")
+    print("TODO: ANSI color codes not working")
+    class bcolors:
+        HEADER    = '\033[95m'
+        OKBLUE    = 'ESC[[94m'
+        OKCYAN    = '\033[96m'
+        OKGREEN   = '\x1b[92m'
+        WARNING   = '\033[93m'
+        FAIL      = 'ESC[[91m'
+        ENDC      = 'ESC[[0m'
+        BOLD      = '\033[1m'
+        UNDERLINE = '\033[4m'
 
 
 NUM_OF_PARTICIPANTS = 10000
@@ -25,6 +42,8 @@ VERBOSE_PARTICIPANTS = False
 VERBOSE_SECURITIES = False 
 VERBOSE_MARKET = False 
 TIME_ELAPSED = False
+BRAKEPOINTS = []
+RUNNING_TIME = -1 
 
 
 if len(sys.argv) >= 2:

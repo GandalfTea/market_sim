@@ -63,14 +63,75 @@ def start():
         print("")
 
 
+# Main Menu
 
 while True:
-    print("Stonkks Sim.")
-    print("1. Start Simulation")
-    print("2. Set brake points")
-    print("3. Set running time")
-    print(" : ", end="")
+    print("\n~sim > ", end="")
     i = input()
-    if i == "1":
+    if i == "start":
         start()
+    elif i == ".exit" or i == "exit":
+        break
+    elif i == ".help":
+        print("\nstart \t\t\t: Start Simulation")
+        print("bset [int] [int] \t: Set brake points at iteration number")
+        print("brm [int] [int] \t: Remove brake points at iteration number")
+        print("set [int] \t\t: Set running time in iteration")
+        print("set none \t\t: Set running time to infinite")
+        print("what \t\t\t: Print all current settings")
+        print(".exit \t\t\t: Exit aplication")
+    elif "bset" in i:
+        i = i.split(" ")
+        for n in i[1:]:
+            try:
+                brk = int(n)
+                imp.BRAKEPOINTS.append(brk)
+                imp.BRAKEPOINTS.sort()
+            except ValueError:
+                print("Error: brakepoint index value is not int")
+        print("Brakepoints : ", imp.BRAKEPOINTS)
+    elif "brm" in i:
+        i = i.split(" ")
+        for n in i[1:]:
+            try:
+                brk = int(n)
+                imp.BRAKEPOINTS.remove(brk)
+            except ValueError:
+                print("Error: value is not an int or breakepoint does not exist")
+        print("Brakepoints : ", imp.BRAKEPOINTS)
+    elif "set" in i:
+        i = i.split(" ")
+        if len(i) >= 3:
+            print("Error: Too many values. Only one value accepted.")
+        if i[1] == "none":
+            imp.RUNNING_TIME = -1
+            print("Running Cycles : infinite")
+        else:
+            try:
+                fin = i[1]
+                imp.RUNNING_TIME = fin
+                print("Running Cycles : ", imp.RUNNING_TIME)
+            except ValueError:
+                print("Error: value is not an int.")
+    elif i == "what":
+        print("\nNumber of participants : ", imp.NUM_OF_PARTICIPANTS)
+        print("Number of securities : ", imp.NUM_OF_SECURITIES)
+        if imp.VERBOSE:
+            print("Printing : verbose")
+        if imp.VERBOSE_PARTICIPANTS:
+            print("Printing : verbose participants")
+        if imp.VERBOSE_SECURITIES:
+            print("Printing : verbose securities")
+        if imp.VERBOSE_MARKET:
+            print("Printing : verbose market")
+        if imp.TIME_ELAPSED:
+            print("Calculating time elapsed")
+        print("Brakepoints : ", imp.BRAKEPOINTS)
+        if imp.RUNNING_TIME != -1:
+            print("Running Cycles : ", imp.RUNNING_TIME)
+        elif imp.RUNNING_TIME == -1:
+            print("Running Cycles : infinite")
+
+    else:
+        print("Command not recognized. Do .help for a list of al commands")
 
