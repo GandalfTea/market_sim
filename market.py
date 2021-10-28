@@ -33,16 +33,16 @@ class market:
     def _match():
         _sort()
         for i in self.orderFlow.buy:
-            if(i.price = -1):
+            if(i.price == -1):
                 i.price = self.orderFlow.sell[0].price
             for j in self.orderFlow.sell:
-                if(j.price = -1):
+                if(j.price == -1):
                     j.price = self.orderFlow.buy[0].price
                 if(i.price == j.price): 
                     #security check the account balance
                     self._execute(i, j) 
 
-    def _execute(buy, sell)
+    def _execute(buy, sell):
         if(sell.quantity > buy.quantity):
             sell.update(sell.quantity - buy.quantity)   
             return
@@ -60,9 +60,10 @@ class market:
         elif otype == "SELL":
             self.orderFlow.sell.append[order(acc, sec, otype, prc, qty)]
         else:
-            raise Exception("Error : unexpected order type, market.py:56").
+            raise Exception("Error : unexpected order type, market.py:56")
 
-    def _rmv_order()
+    def _rmv_order():
+        die()
     
     def _sort():
         orderFlow.buy.sort(key = lambda x : x.price) # big to small
