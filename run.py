@@ -74,6 +74,8 @@ while True:
         break
     elif i == ".help":
         print("\nstart \t\t\t: Start Simulation")
+        print("p [num] \t\t: Set number of participants")
+        print("s [num] \t\t: Set number of securities")
         print("bset [int] [int] \t: Set brake points at iteration number")
         print("brm [int] [int] \t: Remove brake points at iteration number")
         print("set [int] \t\t: Set running time in iteration")
@@ -106,32 +108,63 @@ while True:
         if i[1] == "none":
             imp.RUNNING_TIME = -1
             print("Running Cycles : infinite")
-        else:
+        elif len(i) == 2:
             try:
                 fin = i[1]
                 imp.RUNNING_TIME = fin
                 print("Running Cycles : ", imp.RUNNING_TIME)
             except ValueError:
                 print("Error: value is not an int.")
+        else:
+            print("Command not recognized. Do .help for a list of al commands")
     elif i == "what":
-        print("\nNumber of participants : ", imp.NUM_OF_PARTICIPANTS)
-        print("Number of securities : ", imp.NUM_OF_SECURITIES)
+        print("\nParticipants : ", imp.NUM_OF_PARTICIPANTS)
+        print("Securities : ", imp.NUM_OF_SECURITIES)
+        if imp.VERBOSE or imp.VERBOSE_PARTICIPANTS or imp.VERBOSE_SECURITIES or imp.VERBOSE_MARKET:
+            print("Printing : ", end="")
         if imp.VERBOSE:
-            print("Printing : verbose")
+            print(" verbose", end="")
         if imp.VERBOSE_PARTICIPANTS:
-            print("Printing : verbose participants")
+            print(" participants", end="")
         if imp.VERBOSE_SECURITIES:
-            print("Printing : verbose securities")
+            print(" securities", end="")
         if imp.VERBOSE_MARKET:
-            print("Printing : verbose market")
+            print(" market", end="")
         if imp.TIME_ELAPSED:
+            if imp.VERBOSE or imp.VERBOSE_PARTICIPANTS or imp.VERBOSE_SECURITIES or imp.VERBOSE_MARKET:
+                print("\n", end="")
             print("Calculating time elapsed")
         print("Brakepoints : ", imp.BRAKEPOINTS)
         if imp.RUNNING_TIME != -1:
             print("Running Cycles : ", imp.RUNNING_TIME)
         elif imp.RUNNING_TIME == -1:
             print("Running Cycles : infinite")
-
+    elif "p" in i:
+        i = i.split(" ")
+        if len(i) > 2:
+            print("Error: Too many values. Only one value accepted.")
+        elif len(i) == 2:
+            try:
+                num = int(i[1])
+                imp.NUM_OF_PARTICIPANTS = num
+                print("Participants : ", imp.NUM_OF_PARTICIPANTS)
+            except ValueError:
+                print("Error: value is not an int.")
+        else:
+            print("Command not recognized. Do .help for a list of al commands")
+    elif "s" in i:
+        i = i.split(" ")
+        if len(i) > 2:
+            print("Error: Too many values. Only one value accepted.")
+        elif len(i) == 2:
+            try:
+                num = int(i[1])
+                imp.NUM_OF_SECURITIES = num
+                print("Securities : ", imp.NUM_OF_PARTICIPANTS)
+            except ValueError:
+                print("Error: value is not an int.")
+        else:
+            print("Command not recognized. Do .help for a list of al commands")
     else:
         print("Command not recognized. Do .help for a list of al commands")
 
