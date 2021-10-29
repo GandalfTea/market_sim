@@ -14,6 +14,10 @@ import timeit
 
 # from gold.py import data as prices
 
+<<<<<<< HEAD
+=======
+from datasets/gold import data as prices
+>>>>>>> 7130a39c1bea27be3b5a0719e5fbab6af766aa0c
 
 
 start=timeit.default_timer()

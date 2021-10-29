@@ -157,7 +157,8 @@ class state:
 
 # Participants
 class prt:
-    def __init__(self):
+    def __init__(self, idd):
+        self.id = idd
         self.nonce = random.uniform(-1, 1)              # measure of personal bias and irrationality
         self.tolerance = random.random()                # TODO:  updated after every 10 cycles depending on trading results
         self.liquidity : int = 0                        # init in __bias_liq() 
