@@ -7,8 +7,13 @@ Created on Sat Oct 23 15:08:53 2021
 #e**(mt+c)
 #t was count 
 import timeit
+# import matplotlib as plt
+# import sys
+# # insert at 1, 0 is the script path (or '' in REPL)
+# sys.path.insert(1, 'market_sim/datasets')
 
-from tempPricesArray import data as prices
+# from gold.py import data as prices
+
 
 
 start=timeit.default_timer()
