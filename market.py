@@ -5,6 +5,7 @@ import sys
 
 # TODO: Maybe separate the matching and executing into diferent threads.
 
+
 class order:
     def __init__(self, acc : int, sec : str, otype : str, prc : float, qty : int):
         self.account = int(acc)
@@ -47,33 +48,34 @@ class market:
                         if(imp.PARTICIPANTS[i.account].liquidity >= j.price * j.quantity): # assert enough money to buy
                             if(imp.PARTICIPANTS[j.account].assets[j.security] >= j.quantity): # assert enough assets to sell
                                 self._execute(i, j) 
-
+            #if i not in self.orderFlow.buy: print(f"{i}")
     def _execute(self, buy, sell):
-        if imp.MARKET_TESTING: 
-            print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
-            print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
+        print(".", end="")
+        #if imp.MARKET_TESTING: 
+        #    print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
+        #    print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
         if(sell.quantity > buy.quantity):
             imp.PARTICIPANTS[buy.account].liquidity -= buy.price * buy.quantity
             imp.PARTICIPANTS[sell.account].assets[sell.security] -= buy.quantity
             imp.PARTICIPANTS[sell.account].liquidity += buy.price * buy.quantity
             imp.PARTICIPANTS[buy.account].assets[buy.security] += buy.quantity
             sell.update(sell.quantity - buy.quantity)   
-            if imp.MARKET_TESTING: 
-                print("Executed : ", buy, " ", sell)
-                print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
-                print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
-                print()
+            #if imp.MARKET_TESTING: 
+            #    print("Executed : ", buy, " ", sell)
+            #    print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
+            #    print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
+            #    print()
             self._rmv_order(buy)
         elif(buy.quantity > sell.quantity):
             imp.PARTICIPANTS[buy.account].liquidity -= sell.price * sell.quantity
             imp.PARTICIPANTS[sell.account].assets[sell.security] -= sell.quantity
             imp.PARTICIPANTS[sell.account].liquidity += sell.price * sell.quantity
             imp.PARTICIPANTS[buy.account].assets[sell.security] += sell.quantity
-            if imp.MARKET_TESTING: 
-                print("Executed : ", buy, " ", sell)
-                print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
-                print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
-                print()
+           # if imp.MARKET_TESTING: 
+           #     print("Executed : ", buy, " ", sell)
+           #     print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
+           #     print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
+           #     print()
             buy.update(buy.quantity - sell.quantity)
             self._rmv_order(sell)
         elif(buy.quantity == sell.quantity):
@@ -81,11 +83,11 @@ class market:
             imp.PARTICIPANTS[sell.account].assets[sell.security] -= sell.quantity
             imp.PARTICIPANTS[sell.account].liquidity += sell.price * sell.quantity
             imp.PARTICIPANTS[buy.account].assets[sell.security] += sell.quantity
-            if imp.MARKET_TESTING: 
-                print("Executed : ", buy, " ", sell)
-                print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
-                print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
-                print()
+            #if imp.MARKET_TESTING: 
+            #    print("Executed : ", buy, " ", sell)
+            #    print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
+            #    print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
+            #    print()
             self._rmv_order(buy)
             self._rmv_order(sell)
         assert imp.PARTICIPANTS[buy.account].assets[buy.security] >= 0
@@ -98,7 +100,9 @@ class market:
             sbefore = len(self.orderFlow.sell)
             bbefore = len(self.orderFlow.buy)
         if otype == "BUY":
-            self.orderFlow.buy.append(order(acc, sec, otype, prc, qty))
+            o = order(acc, sec, otype, prc, qty)
+            self.orderFlow.buy.append(o)
+            if imp.MARKET_TESTING : assert o in self.orderFlow.buy
             if imp.MARKET_TESTING : assert len(self.orderFlow.buy) == bbefore + 1, f"{imp.bcolors.FAIL}Error: Failure in adding order to orderFlow{imp.bcolors.ENDC}"
         elif otype == "SELL":
             self.orderFlow.sell.append(order(acc, sec, otype, prc, qty))

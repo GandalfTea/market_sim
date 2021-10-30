@@ -29,7 +29,7 @@ class user:
         }
 sec = ["DICK", "BALLS", "GAY", "HEY", "GURL", "GAMER", "HIT", "OR", "MISS"]
 prc = [202, 25, 458, 54, 23, 154, 89, 874, 54]
-RUN_TIMES = 1000
+RUN_TIMES = 10000
 market = mk.market()
 
 
@@ -82,7 +82,7 @@ tests = [test_matching, test_execution]
 
 
 for i in range(2):
-    print("\n\nPress ENTER to continue")
-    input("")
     func = tests[i]
     func()
+    print("\n\nPress ENTER to continue")
+    input("")
