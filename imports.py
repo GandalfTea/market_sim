@@ -6,6 +6,7 @@ import platform
 
 
 # ANSI colors 
+# TODO: Implement colors for Windows
 if platform.system() == "Linux":
     print("\nWorking on Linux")
     class bcolors:
@@ -22,17 +23,22 @@ elif platform.system() == "Windows":
     print("\nWorking on Windows")
     print("TODO: ANSI color codes not working")
     class bcolors:
-        HEADER    = '\033[95m'
-        OKBLUE    = 'ESC[[94m'
-        OKCYAN    = '\033[96m'
-        OKGREEN   = '\x1b[92m'
-        WARNING   = '\033[93m'
-        FAIL      = 'ESC[[91m'
-        ENDC      = 'ESC[[0m'
-        BOLD      = '\033[1m'
-        UNDERLINE = '\033[4m'
+        HEADER    = ''
+        OKBLUE    = ''
+        OKCYAN    = ''
+        OKGREEN   = ''
+        WARNING   = ''
+        FAIL      = ''
+        ENDC      = ''
+        BOLD      = ''
+        UNDERLINE = ''
 
 
+
+# GLOBAL VARIABLES
+PARTICIPANTS = []
+
+# SETTINGS VARIABLES
 NUM_OF_PARTICIPANTS = 10000
 NUM_OF_SECURITIES = 10
 #CYCLES_PER_MINUTE = 100
@@ -42,10 +48,14 @@ VERBOSE_PARTICIPANTS = False
 VERBOSE_SECURITIES = False 
 VERBOSE_MARKET = False 
 TIME_ELAPSED = False
-BRAKEPOINTS = []
 RUNNING_TIME = -1 
 
+# TESTING 
+MARKET_TESTING = False
+BRAKEPOINTS = []
 
+
+# CONSOLE ARGUMENTS
 if len(sys.argv) >= 2:
     argv = sys.argv[1:]
     for i in argv:
@@ -87,7 +97,6 @@ if len(sys.argv) >= 2:
             #print(str(can_buy[i][0]) + " " + str(can_buy[i][1][0]))
             sys.exit("")
         else:
-            print("DICKS")
             sys.exit("Command not recognized. Type --h or --help for help")
 
 
