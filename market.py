@@ -8,7 +8,9 @@ import sys
 
 class order:
     def __init__(self, acc : int, sec : str, otype : str, prc : float, qty : int):
-        self.account = int(acc)
+        #assert isinstance(acc, int) and isinstance(prc, float) and isinstance(qty, int) 
+        #assert isinstance(sec, str) and isinstance(otype, str) 
+        self.account = acc
         self.security = sec 
         self.otype = otype
         self.price = prc
@@ -37,78 +39,79 @@ class market:
 
     def _match(self):
         self._sort()
-        for i in self.orderFlow.buy:
-            if(i.price == -1):
-                i.price = self.orderFlow.sell[0].price
-            for j in self.orderFlow.sell:
-                if(j.price == -1):
-                    j.price = self.orderFlow.buy[0].price
-                if(i.price == j.price): 
-                    if(i.security == j.security):
-                        if(imp.PARTICIPANTS[i.account].liquidity >= j.price * j.quantity): # assert enough money to buy
-                            if(imp.PARTICIPANTS[j.account].assets[j.security] >= j.quantity): # assert enough assets to sell
-                                self._execute(i, j) 
-            #if i not in self.orderFlow.buy: print(f"{i}")
+        for buy in self.orderFlow.buy:
+            if(buy.price == -1):
+                buy.price = self.orderFlow.sell[0].price
+            for sell in self.orderFlow.sell:
+                if(sell.price == -1):
+                    sell.price = self.orderFlow.buy[0].price
+                if(buy.price == sell.price and buy.security == sell.security): 
+                    try:
+                        assert buy in self.orderFlow.buy # TODO: BUG
+                        assert imp.PARTICIPANTS[buy.account].liquidity >= sell.price * sell.quantity # enough money to buy
+                        assert imp.PARTICIPANTS[sell.account].assets[sell.security] >= sell.quantity  # enough assets to sell
+                        self._execute(buy, sell) 
+                    except AssertionError:
+                        continue
+
+
     def _execute(self, buy, sell):
-        print(".", end="")
-        #if imp.MARKET_TESTING: 
-        #    print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
-        #    print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
         if(sell.quantity > buy.quantity):
-            imp.PARTICIPANTS[buy.account].liquidity -= buy.price * buy.quantity
-            imp.PARTICIPANTS[sell.account].assets[sell.security] -= buy.quantity
-            imp.PARTICIPANTS[sell.account].liquidity += buy.price * buy.quantity
-            imp.PARTICIPANTS[buy.account].assets[buy.security] += buy.quantity
-            sell.update(sell.quantity - buy.quantity)   
-            #if imp.MARKET_TESTING: 
-            #    print("Executed : ", buy, " ", sell)
-            #    print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
-            #    print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
-            #    print()
+            try:
+                imp.PARTICIPANTS[buy.account].liquidity -= buy.price * buy.quantity
+                imp.PARTICIPANTS[sell.account].assets[sell.security] -= buy.quantity
+                imp.PARTICIPANTS[sell.account].liquidity += buy.price * buy.quantity
+                imp.PARTICIPANTS[buy.account].assets[buy.security] += buy.quantity
+            except IndexError:
+                sys.exit(f"{imp.bcolors.FAIL}Error: could not execute order {order} because the account numbers are out of range.")
+            sell.update(sell.quantity - buy.quantity)
             self._rmv_order(buy)
         elif(buy.quantity > sell.quantity):
-            imp.PARTICIPANTS[buy.account].liquidity -= sell.price * sell.quantity
-            imp.PARTICIPANTS[sell.account].assets[sell.security] -= sell.quantity
-            imp.PARTICIPANTS[sell.account].liquidity += sell.price * sell.quantity
-            imp.PARTICIPANTS[buy.account].assets[sell.security] += sell.quantity
-           # if imp.MARKET_TESTING: 
-           #     print("Executed : ", buy, " ", sell)
-           #     print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
-           #     print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
-           #     print()
+            try:
+                imp.PARTICIPANTS[buy.account].liquidity -= sell.price * sell.quantity
+                imp.PARTICIPANTS[sell.account].assets[sell.security] -= sell.quantity
+                imp.PARTICIPANTS[sell.account].liquidity += sell.price * sell.quantity
+                imp.PARTICIPANTS[buy.account].assets[sell.security] += sell.quantity
+            except IndexError:
+                sys.exit(f"{imp.bcolors.FAIL}Error: could not execute order {order} because the account numbers are out of range.")
             buy.update(buy.quantity - sell.quantity)
             self._rmv_order(sell)
         elif(buy.quantity == sell.quantity):
-            imp.PARTICIPANTS[buy.account].liquidity -= sell.price * sell.quantity
-            imp.PARTICIPANTS[sell.account].assets[sell.security] -= sell.quantity
-            imp.PARTICIPANTS[sell.account].liquidity += sell.price * sell.quantity
-            imp.PARTICIPANTS[buy.account].assets[sell.security] += sell.quantity
-            #if imp.MARKET_TESTING: 
-            #    print("Executed : ", buy, " ", sell)
-            #    print("Buy : ", imp.PARTICIPANTS[buy.account].assets[buy.security])
-            #    print("Sell : ", imp.PARTICIPANTS[sell.account].liquidity)
-            #    print()
+            try:
+                imp.PARTICIPANTS[buy.account].liquidity -= sell.price * sell.quantity
+                imp.PARTICIPANTS[sell.account].assets[sell.security] -= sell.quantity
+                imp.PARTICIPANTS[sell.account].liquidity += sell.price * sell.quantity
+                imp.PARTICIPANTS[buy.account].assets[sell.security] += sell.quantity
+            except IndexError:
+                sys.exit(f"{imp.bcolors.FAIL}Error: could not execute order {order} because the account numbers are out of range.")
             self._rmv_order(buy)
             self._rmv_order(sell)
-        assert imp.PARTICIPANTS[buy.account].assets[buy.security] >= 0
-        assert imp.PARTICIPANTS[sell.account].assets[sell.security] >= 0
-        assert imp.PARTICIPANTS[buy.account].liquidity >= 0
-        assert imp.PARTICIPANTS[sell.account].liquidity >= 0
+        else:
+            raise Exception(f"{imp.bcolors.FAIL}Error: Could not execute orders {buy} : {sell}.")
+
+        assert imp.PARTICIPANTS[buy.account].assets[buy.security] >= 0, f"{imp.bcolors.FAIL}Error: transaction failure in _execute(){imp.bcolors.ENDC}"
+        assert imp.PARTICIPANTS[sell.account].assets[sell.security] >= 0, f"{imp.bcolors.FAIL}Error: transaction failure in _execute(){imp.bcolors.ENDC}"
+        assert imp.PARTICIPANTS[buy.account].liquidity >= 0, f"{imp.bcolors.FAIL}Error: transaction failure in _execute(){imp.bcolors.ENDC}"
+        assert imp.PARTICIPANTS[sell.account].liquidity >= 0, f"{imp.bcolors.FAIL}Error: transaction failure in _execute(){imp.bcolors.ENDC}"
+        if imp.MARKET_TESTING: print(".", end="")
+
+
+
 
     def create_order(self, acc : int, sec : str, otype : str, prc : float, qty : int):
-        if imp.MARKET_TESTING == True:
-            sbefore = len(self.orderFlow.sell)
-            bbefore = len(self.orderFlow.buy)
         if otype == "BUY":
             o = order(acc, sec, otype, prc, qty)
             self.orderFlow.buy.append(o)
-            if imp.MARKET_TESTING : assert o in self.orderFlow.buy
-            if imp.MARKET_TESTING : assert len(self.orderFlow.buy) == bbefore + 1, f"{imp.bcolors.FAIL}Error: Failure in adding order to orderFlow{imp.bcolors.ENDC}"
+            assert o in self.orderFlow.buy, f"{imp.bcolors.FAIL}Error: Failure in adding order to orderFlow.buy{imp.bcolors.ENDC}"
         elif otype == "SELL":
-            self.orderFlow.sell.append(order(acc, sec, otype, prc, qty))
-            if imp.MARKET_TESTING : assert len(self.orderFlow.sell) == sbefore + 1, f"{imp.bcolors.FAIL}Error: Failure in adding order to orderFlow{imp.bcolors.ENDC}"
+            o = order(acc, sec, otype, prc, qty)
+            self.orderFlow.sell.append(o)
+            assert o in self.orderFlow.sell, f"{imp.bcolors.FAIL}Error: Failure in adding order to orderFlow.sell{imp.bcolors.ENDC}"
         else:
+            # return err
             raise Exception(f"\n{imp.bcolors.FAIL}Error : unexpected order type, market.py:56{imp.bcolors.ENDC}\n")
+
+
 
     def dump_orders(self):
         for i in self.orderFlow.buy:
@@ -116,22 +119,22 @@ class market:
         for i in self.orderFlow.sell:
             print(i)
 
+
+
     def _rmv_order(self, order):
-        if imp.MARKET_TESTING == True:
-            sbefore = len(self.orderFlow.sell)
-            bbefore = len(self.orderFlow.buy)
         try:
             if order.otype == "SELL":
                 self.orderFlow.sell.remove(order)
-                if imp.MARKET_TESTING : assert len(self.orderFlow.sell) == sbefore - 1, f"{imp.bcolors.FAIL}Error: Failure in removing order from orderFlow{imp.bcolors.ENDC}"
+                assert order not in self.orderFlow.sell, f"{imp.bcolors.FAIL}Error: Failure in removing order from orderFlow.sell{imp.bcolors.ENDC}"
             elif order.otype == "BUY":
                 self.orderFlow.buy.remove(order)
-                if imp.MARKET_TESTING : assert len(self.orderFlow.buy) == bbefore - 1, f"{imp.bcolors.FAIL}Error: Failure in removing order from orderFlow{imp.bcolors.ENDC}"
+                assert order not in self.orderFlow.buy, f"{imp.bcolors.FAIL}Error: Failure in removing order from orderFlow.buy{imp.bcolors.ENDC}"
             else:
                 raise Exception(f"\n{imp.bcolors.FAIL}Error : unexpected order type, market.py:94{imp.bcolors.ENDC}\n")
         except ValueError:
             sys.exit(f"\n{imp.bcolors.FAIL}Error: Tried to remove orderFlow order that does not exist.{imp.bcolors.ENDC} market.py:130 : {order}\n")
     
+
     def _sort(self):
         self.orderFlow.buy.sort(key = lambda x : x.price) # big to small
         self.orderFlow.sell.sort(key = lambda x : x.price, reverse=True) # small to big

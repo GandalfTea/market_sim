@@ -15,27 +15,27 @@ imp.MARKET_TESTING = True
 class user:
     def __init__(self, acc):
         self.acc = acc
-        self.liquidity = random.randint(100, 1000)
+        self.liquidity = random.randint(1000, 10000)
         self.assets = {
-            "DICK" : random.randint(0, 100),
-            "BALLS" : random.randint(0, 100),
-            "GAY" : random.randint(0, 100),
-            "HEY" : random.randint(0, 100),
-            "GURL" : random.randint(0, 100),
-            "GAMER" : random.randint(0, 100),
-            "HIT" : random.randint(0, 100),
-            "OR" : random.randint(0, 100),
-            "MISS" : random.randint(0, 100),
+            "DICK" : random.randint(100,  1000),
+            "BALLS" : random.randint(100, 1000),
+            "GAY" : random.randint(100, 1000),
+            "HEY" : random.randint(100, 1000),
+            "GURL" : random.randint(100, 1000),
+            "GAMER" : random.randint(100, 1000),
+            "HIT" : random.randint(100, 1000),
+            "OR" : random.randint(100, 1000),
+            "MISS" : random.randint(100, 1000),
         }
 sec = ["DICK", "BALLS", "GAY", "HEY", "GURL", "GAMER", "HIT", "OR", "MISS"]
 prc = [202, 25, 458, 54, 23, 154, 89, 874, 54]
-RUN_TIMES = 10000
+RUN_TIMES = 1000
 market = mk.market()
 
 
 def test_matching():
     print("TESTING: Matching")
-    for i in range(10000000):
+    for i in range(100000):
         for i in range(RUN_TIMES):
             acc = i
             imp.PARTICIPANTS.append(user(i))
@@ -45,12 +45,7 @@ def test_matching():
             price = prc[idx] + random.randrange(0, 20) 
             qty = random.randint(1, 200)
             market.create_order(acc, security, otype, price, qty)
-        try:
-            market._match()
-        except ValueError:
-            print("TEST FAILED: ValueError raised.")
-            break
-    print("TEST COMPLETED")
+        market._match()
 
 def test_execution():
     for i in range(RUN_TIMES):
