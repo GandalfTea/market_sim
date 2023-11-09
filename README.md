@@ -1,6 +1,6 @@
 &nbsp;
 ### About
-Simulates a simple stock market with a variable number of securities and participants. Made to potentially test an implementation of an information or prediction market by updating a personal trust variable that acts as weight in the final outcome. (China not cool)
+Simulates a simple stock market with a variable number of securities and participants. Made to potentially test an implementation of an information or prediction market by updating a personal trust variable that acts as weight in the final outcome.
 
 &nbsp;
 
